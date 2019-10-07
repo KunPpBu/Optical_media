@@ -13,7 +13,7 @@
 
 // The input data is a vector 'y' of length 'N'.
 data {
-  int<lower=0> N; //the number of observations
+  int<lower=0> N; //the number of observations for each group
   int<lower=0> K; //the number of columns in the model matrix
   vector[N*K] t; //time conditions
   vector[N*K] x1; //log(RH)
