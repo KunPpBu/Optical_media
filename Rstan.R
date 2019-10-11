@@ -1,5 +1,6 @@
 #load libraries
 
+
 library(ggplot2)
 library(StanHeaders)
 library(rstan)
@@ -42,13 +43,6 @@ x1_stan <- (logRH-log(40))/(log(85)-log(40))
 head(x1_stan)
 x2_stan <- (11605/(T+273.15)-11605/(15+273.15))/(11605/(85+273.15)-11605/(15+273.15))
 head(x2_stan)
-
-#group-level regression coefficients
-# beta1[(N-1)*5+K]<-exp(logA + B*x1[(N-1)*5+K] + delta_H*x2[(N-1)*5+K]);
-# mu[(N-1)*5+K] = mat[N,1] + (beta1[(N-1)*5+K]*((t[(N-1)*5+K])%^%(mat[N,2])));
-#
-# #the model matrix
-# X<-model.matrix(~x+y,data=data.frame(x=runif(N,-2,2),y=runif(N,-2,2)))
 
 # set up the model
 for(n in 1:N){

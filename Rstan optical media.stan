@@ -23,7 +23,6 @@ data {
   vector[N*K] y; //the response variable
   // vector[N*K] RH;
   // vector[N*K] T;
-
   int<lower = 1> wishart_df; //degree of freedom in the wishart dist.
 }
 
@@ -34,6 +33,8 @@ data {
 //   x1 = log(RH);
 //   
 // }
+
+
 // The parameters accepted by the model. 
 parameters {
   vector<lower=0>[K] tau; //the standard deviation of the regression coefficients
@@ -74,11 +75,9 @@ model {
   B ~ normal(0, 1e-3);
   delta_H ~ normal(0,1e-3);
   mat[,1] ~ multi_normal_cholesky_lpdf(mu_mat,sigma_mat);
-
   // sigma_mat ~ wishart(wishart_df,sigma_for_prior);
   // sigma_for_prior ~ lkj_corr_cholesky(1.5);
 
-  
   for(n in 1:N){
     for(k in 1:K){
      y[(n-1)*5+k] ~ lognormal(mu[(n-1)*5+k], tau );  
