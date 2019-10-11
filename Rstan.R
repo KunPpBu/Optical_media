@@ -4,8 +4,12 @@ library(ggplot2)
 library(StanHeaders)
 library(rstan)
 library(RColorBrewer)
-#where the STAN model is saved
-setwd("~/Documents/Kun_Bu/simulation/")
+library(readxl)
+library(LearnBayes)
+
+#Import dataset
+ISO_data <- read_excel("ISO data.xlsx")
+  
 set.seed(1000000)
 #set up the model data
 N <- 90
