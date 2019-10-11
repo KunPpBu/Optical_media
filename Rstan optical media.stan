@@ -9,6 +9,10 @@
 //    https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started
 //
 
+// A short intro of STAN
+//https://faculty.ai/blog/a-short-introduction-to-stan/
+
+
 // The input data is a vector 'y' of length 'N'.
 data {
   int<lower=0> N; //the number of observations in each group
@@ -36,7 +40,7 @@ parameters {
   real<lower=0> logA;
   real<lower=0> B;
   real<lower=0> delta_H;
-  matrix[N,N] mat;
+  matrix[(N-1)*5+K,(N-1)*5+K] mat;
   vector[N*K] mu_mat;
   corr_matrix[N*K] sigma_mat;
   corr_matrix[N*K] sigma_for_prior;
@@ -44,8 +48,8 @@ parameters {
 
 
 transformed parameters{
-    vector[N*K] beta1;
-    vector[N*K] mu;
+    vector[(N-1)*5+K] beta1;
+    vector[(N-1)*5+K] mu;
     for (n in 1:N){
       for(k in 1:K){
      beta1[(n-1)*5+k] = exp(logA + B*x1[(n-1)*5+k] + delta_H*x2[(n-1)*5+k]);
