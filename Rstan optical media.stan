@@ -41,8 +41,8 @@ parameters {
   real<lower=0> logA;
   real<lower=0> B;
   real<lower=0> delta_H;
-  matrix[(N-1)*5+K,(N-1)*5+K] mat;
-  vector[N*K] mu_mat;
+  vector[2] mat;
+  vector[2] mu_mat;
   corr_matrix[N*K] sigma_mat;
   corr_matrix[N*K] sigma_for_prior;
 }
@@ -54,7 +54,7 @@ transformed parameters{
     for (n in 1:N){
       for(k in 1:K){
      beta1[(n-1)*5+k] = exp(logA + B*x1[(n-1)*5+k] + delta_H*x2[(n-1)*5+k]);
-     mu[(n-1)*5+k] = mat[(n-1)*5+k,1] + beta1[(n-1)*5+k]*(pow(t[(n-1)*5+k],mat[(n-1)*5+k,2]));
+     mu[(n-1)*5+k] = mat[1] + beta1[(n-1)*5+k]*(pow(t[(n-1)*5+k],mat[2]));
     }}
 }
 
@@ -74,7 +74,7 @@ model {
   logA ~ normal(0,1e-3);
   B ~ normal(0, 1e-3);
   delta_H ~ normal(0,1e-3);
-  mat[,1] ~ multi_normal_cholesky_lpdf(mu_mat,sigma_mat);
+  mat ~ multi_normal(mu_mat,sigma_mat);
   // sigma_mat ~ wishart(wishart_df,sigma_for_prior);
   // sigma_for_prior ~ lkj_corr_cholesky(1.5);
 
