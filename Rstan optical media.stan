@@ -17,45 +17,39 @@
 data {
   int<lower=0> N; //the number of observations in each group
   int<lower=0> K; //the number of columns in the model matrix
-  vector[N*K] t; //time conditions
-  vector[N*K] x1; //log(RH)
-  vector[N*K] x2;
-  vector[N*K] y; //the response variable
-  // vector[N*K] RH;
-  // vector[N*K] T;
+  real<lower=0,upper=N*K> t; //time conditions
+  real<lower=0,upper=N*K> RH;
+  real<lower=0,upper=N*K> T;
+  row_vector[N*K] y; //the response variable
   int<lower = 1> wishart_df; //degree of freedom in the wishart dist.
 }
 
-// transformed data{
-//   vector[N*K] x1; //log(RH)
-//   vector[N*K] x2;
-//   x2 = 11605/(T+273.15);
-//   x1 = log(RH);
-//   
-// }
+ transformed data{
+  real<lower=0,upper=(N-1)*5+K> x1; //log(RH)
+  real<lower=0,upper=(N-1)*5+K> x2;
+  x2 = 11605/(T+273.15);
+  x1 = log(RH);
+}
 
 
 // The parameters accepted by the model. 
 parameters {
-  vector<lower=0>[K] tau; //the standard deviation of the regression coefficients
-  real<lower=0> logA;
-  real<lower=0> B;
-  real<lower=0> delta_H;
-  vector[2] mat;
-  vector[2] mu_mat;
-  corr_matrix[N*K] sigma_mat;
-  corr_matrix[N*K] sigma_for_prior;
+  row_vector[N*K] tau; //the standard deviation of the regression coefficients
+  real<lower=0,upper=90> A;
+  real<lower=0,upper=90> B;
+  real<lower=0,upper=90> delta_H;
+  matrix[N*K,2] mat;
+  matrix[N*K,2] mu_mat;
+  corr_matrix[2] sigma_mat;
+  corr_matrix[2] sigma_for_prior;
 }
 
 
 transformed parameters{
-    vector[(N-1)*5+K] beta1;
-    vector[(N-1)*5+K] mu;
-    for (n in 1:N){
-      for(k in 1:K){
-     beta1[(n-1)*5+k] = exp(logA + B*x1[(n-1)*5+k] + delta_H*x2[(n-1)*5+k]);
-     mu[(n-1)*5+k] = mat[1] + beta1[(n-1)*5+k]*(pow(t[(n-1)*5+k],mat[2]));
-    }}
+    real<lower=0,upper=(N-1)*5+K> beta1;
+    row_vector[N*K] mu;
+    beta1 = exp(log(A) + B*x1 + delta_H*x2);
+    mu[N*K] = mat[N*K,1] + beta1*(pow(t,mat[N*K,2]));
 }
 
 // The model to be estimated. We model the output
@@ -71,12 +65,12 @@ model {
   tau ~ gamma(1e-3,1e-3);
   mu_mat[1] ~ normal(1e-3,1e-3);
   mu_mat[2] ~ normal(1e-3,1e-3);
-  logA ~ normal(0,1e-3);
+  A ~ normal(0,1e-3);
   B ~ normal(0, 1e-3);
   delta_H ~ normal(0,1e-3);
-  mat ~ multi_normal(mu_mat,sigma_mat);
-  // sigma_mat ~ wishart(wishart_df,sigma_for_prior);
-  // sigma_for_prior ~ lkj_corr_cholesky(1.5);
+  mat[N*K,] ~ multi_normal(mu_mat[N*K,],sigma_mat);
+  sigma_mat ~ wishart(wishart_df,sigma_for_prior);
+  sigma_for_prior ~ lkj_corr_cholesky(1.5);
 
   for(n in 1:N){
     for(k in 1:K){

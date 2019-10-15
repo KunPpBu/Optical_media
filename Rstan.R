@@ -32,8 +32,8 @@ delta_H <-0
 beta1<-0 # beta1 is the transformed parameters
 mat<-matrix(c(1,1),nrow=N,ncol=N)
 
-mat<-1
-mu <- 1
+mat<-matrix(c(0,0),nrow=N, ncol=2)
+mu <- rnorm(90,3)
 mu_mat1 <- matrix(c(0,0),nrow = N,ncol = N)
 mu_mat <- as.numeric(mu_mat1) #mu_mat[,1] is mu0, mu_mat[,2] is gamma0
 
@@ -51,7 +51,7 @@ for(n in 1:N){
   for(k in 1:K){
     y[(n-1)*5+k] ~ rnorm(mu[(n-1)*5+k], sigma)
     mu[(n-1)*5+k] <- mat[n,1] + (beta1[(n-1)*5+k]*(t[(n-1)*5+k]^mat[n,2]))
-    beta1[(n-1)*5+k] <- exp(logA + B*x1[(n-1)*5+k] + delta_H*x2[(n-1)*5+k])
+    beta1[(n-1)*5+k] <- exp(log(A) + B*x1[(n-1)*5+k] + delta_H*x2[(n-1)*5+k])
   }
   return(y)}
 
