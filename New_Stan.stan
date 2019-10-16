@@ -22,7 +22,7 @@ data {
   // Temp from the data
   int<lower=0> T[N*K];
   // Continuous outcome
-  real y_ijk[N*K];//number of the outputs
+  vector[N*K] y_ijk;//number of the outputs
   // Continuous predictor
   real t_ijk[N*K];
 }
@@ -39,27 +39,28 @@ transformed data{
 parameters {
   // Define parameters to estimate
   // Population intercept (a real number)
-  real beta0[N];
+  real beta0;
+  real gamma;
   // Level-1
   real<lower=0> sigma;
   // Random effect
   matrix[N,2] mat;
-  matrix[2,2] sigma_mat;
+  corr_matrix[2] sigma_mat;
   // Hyperparameters
   vector[2] mu_mat;
-  real<lower=0> A;
-  real<lower=0> B;
-  real<lower=0> delta_H;
+  real<lower=0> A[N*K];
+  real<lower=0> B[N*K];
+  real<lower=0> delta_H[N*K];
   corr_matrix[2] sigma_for_prior;
 }
 
 //Parameters processing before the postier is computed
 transformed parameters{
   // Population slope
-  real beta1[(N-1)*5+K];
+  row_vector[(N-1)*5+K] beta1;
   for(k in 1:K){
     for(n in 1:N){
-       beta1[(n-1)*5+k] = exp(log(A) + B*x1[(n-1)*5+k] + delta_H*x2[(n-1)*5+k]); 
+       beta1[(n-1)*5+k] = exp(log(A[n*k]) + B[n*k]*x1[(n-1)*5+k] + delta_H[n*k]*x2[(n-1)*5+k]); 
     }
   }
    
@@ -76,12 +77,9 @@ model {
   delta_H ~ normal(0,1e-3);
   mat[2] ~ multi_normal(mu_mat,sigma_mat);
   sigma_mat ~ wishart(3,sigma_for_prior);
-  sigma_for_prior ~ lkj_corr_cholesky(1.5);
-  for(n in 1:N){
-    for(k in 1:K){
-       y_ijk[(n-1)*5+k] ~ lognormal(beta0[n] + beta1[(n-1)*5+k]*pow(t_ijk[N*K],mat[N,2]), sigma);
-    }
-  }
+  sigma_for_prior ~ lkj_corr(1);
+  
+  y_ijk ~ lognormal(beta0 + beta1*(pow(t_ijk[N*K],gamma)), sigma);
  
 }
 

@@ -22,15 +22,15 @@ x2_stan <- (11605/(T+273.15)-11605/(15+273.15))/(11605/(85+273.15)-11605/(15+273
 head(x2_stan)
 
 #set the parameters
-beta0 <- 3
-beta1 <- 3
-sigma <- 1.5
-mat <- matrix(runif(450,0,30),nrow=N, ncol=2)
-mu_mat <- matrix(runif(450,0,3),nrow=N,ncol=2)
+# beta0 <- rnorm(450,1,1.5)
+# beta1 <- rnorm(450,1,1.5)
+sigma <- rnorm(450,7,2)
+mat <- matrix(runif(450,1,3),nrow=N, ncol=2)
+mu_mat <- matrix(runif(450,1,3),nrow=N,ncol=2)
 sigma_mat <- matrix(runif(450,0,2),nrow=2, ncol=2)
-A <- runif(90,70,80)
-B <- runif(90,-3,3)
-delta_H <- runif(90,0.5,1.5)
+A <- rnorm(90,100,1)
+B <- rnorm(90,10,3)
+delta_H <- rnorm(90,10,1.5)
 sigma_for_prior <- diag(1,2,2)
 for(n in 1:N){
   for(k in 1:K){
@@ -40,11 +40,11 @@ for(n in 1:N){
 
 beta0 <- mat[,1]
 gamma <- mat[,2]
-mu <- beta0 + beta1 * (t_ijk^mat[,2])
 # outcome
 
 for(n in 1:N){
   for(k in 1:K){
+    mu[(n-1)*5+k] <- beta0[n] + beta1[(n-1)*5+k] * (t_ijk[(n-1)*5+k]^gamma[n])
     y_ijk[(n-1)*5+k] <- mu[(n-1)*5+k] + sigma[(n-1)*5+k]
   }
 }
@@ -66,7 +66,7 @@ cat(stan_code)
 
 # Run Stan
 runStan <- stan(model_code=stan_code,data=stan_data,
-                chains = 3, iter = 3000,warmup = 500, thin = 10)
+                chains = 3, iter = 3000, warmup = 500, thin = 10, init_r = .1)
 
 
 
