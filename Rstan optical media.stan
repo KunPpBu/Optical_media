@@ -38,8 +38,8 @@ parameters {
   real<lower=0,upper=90> A;
   real<lower=0,upper=90> B;
   real<lower=0,upper=90> delta_H;
-  matrix[N*K,2] mat;
-  matrix[N*K,2] mu_mat;
+  matrix[N,2] mat;
+  matrix[N,2] mu_mat;
   corr_matrix[2] sigma_mat;
   corr_matrix[2] sigma_for_prior;
 }
@@ -47,9 +47,9 @@ parameters {
 
 transformed parameters{
     real<lower=0,upper=(N-1)*5+K> beta1;
-    row_vector[N*K] mu;
+    row_vector[N] mu;
     beta1 = exp(log(A) + B*x1 + delta_H*x2);
-    mu[N*K] = mat[N*K,1] + beta1*(pow(t,mat[N*K,2]));
+    mu[N] = mat[N,1] + beta1*(pow(t,mat[N,2]));
 }
 
 // The model to be estimated. We model the output
