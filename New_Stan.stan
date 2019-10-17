@@ -20,7 +20,7 @@ data {
   // RH from the data
   real RH[N*K];
   // Temp from the data
-  int<lower=0> T[N*K];
+  int<lower=1> T[N*K];
   // Continuous outcome
   vector[N*K] y_ijk;//number of the outputs
   // Continuous predictor
@@ -41,12 +41,12 @@ parameters {
   // Random effect
   matrix[N,2] mat;
   // Level-1
-  real<lower=0> sigma;
+  real<lower=1> sigma;
   // Hyperparameters
   vector[2] mu_mat;
   real<lower=100> A[N*K];
-  real<lower=0> B[N*K];
-  real<lower=0> delta_H[N*K];
+  real<lower=1> B[N*K];
+  real<lower=1> delta_H[N*K];
   corr_matrix[2] sigma_mat;
   corr_matrix[2] sigma_for_prior;
 }
@@ -84,12 +84,13 @@ model {
   sigma_for_prior ~ lkj_corr(1);
   for (k in 1:K){
     for (n in 1:N){
-      y_ijk[n*k] ~ lognormal(mu[n*k], sigma);
+      y_ijk[(n-1)*5+k] ~ lognormal(mu[(n-1)*5+k], sigma);
     }
   }
-  
+ 
  
 }
+
 
 
 
