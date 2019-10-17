@@ -24,6 +24,7 @@ head(x2_stan)
 #set the parameters
 # beta0 <- rnorm(450,1,1.5)
 # beta1 <- rnorm(450,1,1.5)
+mu <- rnorm(450,1,1)
 sigma <- rnorm(450,7,2)
 mat <- matrix(runif(450,1,3),nrow=N, ncol=2)
 mu_mat <- matrix(runif(450,1,3),nrow=N,ncol=2)
@@ -62,7 +63,7 @@ stan_data <- list(N=N,
 # Load Stan file
 fileName <- "New_Stan.stan"
 stan_code <- readChar(fileName,file.info(fileName)$size)
-cat(stan_code)
+# cat(stan_code)
 
 # Run Stan
 runStan <- stan(model_code=stan_code,data=stan_data,
