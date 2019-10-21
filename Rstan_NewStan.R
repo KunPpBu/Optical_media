@@ -28,9 +28,9 @@ sigma <- rnorm(450,7,2)
 mat <- matrix(runif(450,1,3),nrow=N, ncol=2)
 mu_mat <- matrix(runif(450,1,3),nrow=N,ncol=2)
 sigma_mat <- matrix(runif(450,0,2),nrow=2, ncol=2)
-A <- rnorm(90,100,1)
-B <- rnorm(90,10,3)
-delta_H <- rnorm(90,10,1.5)
+A <- rnorm(450,100,1)
+B <- rnorm(450,10,3)
+delta_H <- rnorm(450,10,1.5)
 sigma_for_prior <- matrix(c(1,1,1,1),2,2)
 for(n in 1:N){
   for(k in 1:K){
@@ -66,9 +66,11 @@ stan_code <- readChar(fileName,file.info(fileName)$size)
 
 # Run Stan
 runStan <- stan(model_code=stan_code,data=stan_data,
-                chains = 3, iter = 3000, warmup = 500, thin = 10, init_r = .1)
+                chains = 3, iter = 8000, warmup = 500, thin = 10, init_r = 0)
 
 print(runStan, pars=c("mat","A","B","delta_H","sigma_mat","sigma"))
+resStanExt <- rstan::extract(runStan, permuted = TRUE)
+rstan::traceplot(runStan, pars = c("mat","A","B","delta_H","sigma_mat","sigma"), inc_warmup = FALSE)
 
 
 

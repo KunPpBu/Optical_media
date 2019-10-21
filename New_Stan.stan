@@ -35,7 +35,7 @@ transformed data{
     for(n in 1:N){
        x1[(n-1)*5+k] = log(RH[(n-1)*5+k]);
        x2[(n-1)*5+k] = 11605/(T[(n-1)*5+k]+273.15);
-       print("x1:", x1);
+       // print("x1:", x1);
     }
   }
  
@@ -80,9 +80,9 @@ transformed parameters{
 
 model {
   // mu ~ cauchy(0,1e-3);
-  sigma ~ gamma(1e-3,1e-3);
-  mu_mat[1] ~ normal(1e-3,1e-3);
-  mu_mat[2] ~ normal(1e-3,1e-3);
+  sigma ~ gamma(0,1e-3);
+  mu_mat[1] ~ normal(0,1e-3);
+  mu_mat[2] ~ normal(0,1e-3);
   A ~ normal(0,1e-3);
   B ~ normal(0, 1e-3);
   delta_H ~ normal(0,1e-3);
