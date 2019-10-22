@@ -65,13 +65,19 @@ stan_code <- readChar(fileName,file.info(fileName)$size)
 # cat(stan_code)
 
 # Run Stan
-runStan <- stan(model_code=stan_code,data=stan_data,
-                chains = 3, iter = 8000, warmup = 500, thin = 10, init_r = 0)
+runStan <- stan(model_code=stan_code,data=stan_data, 
+                chains = 3, iter = 35000, warmup = 1000, thin = 10, init_r = 0)
+print(runStan, pars=c("mat"))
 
+# saveRDS(runStan, "runstan.rds")
 print(runStan, pars=c("mat","A","B","delta_H","sigma_mat","sigma"))
+
+
 resStanExt <- rstan::extract(runStan, permuted = TRUE)
 rstan::traceplot(runStan, pars = c("mat","A","B","delta_H","sigma_mat","sigma"), inc_warmup = FALSE)
-
+pdf(paste(outdir,"stan trace plot.pdf",sep=""))
+rstan::traceplot(runStan, pars = c("sigma"), inc_warmup = FALSE)
+dev.off()
 
 
 

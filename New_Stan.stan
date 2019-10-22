@@ -80,7 +80,7 @@ transformed parameters{
 
 model {
   // mu ~ cauchy(0,1e-3);
-  sigma ~ gamma(0,1e-3);
+  sigma ~ gamma(1e-3,1e-3);
   mu_mat[1] ~ normal(0,1e-3);
   mu_mat[2] ~ normal(0,1e-3);
   A ~ normal(0,1e-3);
