@@ -28,15 +28,16 @@ sigma <- rnorm(450,7,2)
 mat <- matrix(runif(450,1,3),nrow=N, ncol=2)
 mu_mat <- matrix(runif(450,1,3),nrow=N,ncol=2)
 sigma_mat <- matrix(runif(450,0,2),nrow=2, ncol=2)
-A <- rnorm(450,100,1)
+A <- rnorm(450,10,3)
 B <- rnorm(450,10,3)
 delta_H <- rnorm(450,10,1.5)
 sigma_for_prior <- matrix(c(1,1,1,1),2,2)
-for(n in 1:N){
-  for(k in 1:K){
-    beta1[(n-1)*5+k] <- exp(log(A[n]) + B[n]*x1_stan[(n-1)*5+k] + delta_H[n]*x2_stan[(n-1)*5+k]) 
-  }
-}
+beta1<- exp(log(A) + B*x1_stan + delta_H*x2_stan)
+# for(n in 1:N){
+#   for(k in 1:K){
+#     beta1[(n-1)*5+k] <- exp(log(A[n]) + B[n]*x1_stan[(n-1)*5+k] + delta_H[n]*x2_stan[(n-1)*5+k]) 
+#   }
+# }
 
 beta0 <- mat[,1]
 gamma <- mat[,2]
@@ -44,6 +45,7 @@ gamma <- mat[,2]
 # Set up the initial value of outcome
 for(n in 1:N){
   for(k in 1:K){
+    beta1[(n-1)*5+k] <- exp(log(A[n]) + B[n]*x1_stan[(n-1)*5+k] + delta_H[n]*x2_stan[(n-1)*5+k])
     mu[(n-1)*5+k] <- beta0[n] + beta1[(n-1)*5+k] * (t_ijk[(n-1)*5+k]^gamma[n])
     y_ijk[(n-1)*5+k] <- mu[(n-1)*5+k] + sigma[(n-1)*5+k]
   }
@@ -66,8 +68,19 @@ stan_code <- readChar(fileName,file.info(fileName)$size)
 
 # Run Stan
 runStan <- stan(model_code=stan_code,data=stan_data, 
-                chains = 3, iter = 35000, warmup = 1000, thin = 10, init_r = 0)
+                chains = 3, iter = 35000, warmup = 1000, thin = 10, init_r = .1, init=500)
 print(runStan, pars=c("mat"))
+
+
+list_of_draws <- extract(runStan)
+print(names(list_of_draws))
+dim(list_of_draws$A)
+
+
+
+
+
+
 
 # saveRDS(runStan, "runstan.rds")
 print(runStan, pars=c("mat","A","B","delta_H","sigma_mat","sigma"))

@@ -1,16 +1,16 @@
 //
-
-// This Stan program defines a simple model, with a
+  
+  // This Stan program defines a simple model, with a
 // vector of values 'y' modeled as normally distributed
 // with mean 'mu' and standard deviation 'sigma'.
 //
-// Learn more about model development with Stan at:
-//
-//    http://mc-stan.org/users/interfaces/rstan.html
+  // Learn more about model development with Stan at:
+  //
+  //    http://mc-stan.org/users/interfaces/rstan.html
 //    https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started
 //
-
-// The input data. 
+  
+  // The input data. 
 data {
   // Define variables in data
   // Number of level-1 observations (an integer)
@@ -33,12 +33,12 @@ transformed data{
   real x2[(N-1)*5+K];
   for(k in 1:K){
     for(n in 1:N){
-       x1[(n-1)*5+k] = log(RH[(n-1)*5+k]);
-       x2[(n-1)*5+k] = 11605/(T[(n-1)*5+k]+273.15);
-       // print("x1:", x1);
+      x1[(n-1)*5+k] = log(RH[(n-1)*5+k]);
+      x2[(n-1)*5+k] = 11605/(T[(n-1)*5+k]+273.15);
+      // print("x1:", x1);
     }
   }
- 
+  
 }
 
 // The parameters accepted by the model.
@@ -47,12 +47,12 @@ parameters {
   // Random effect
   matrix[N,2] mat;
   // Level-1
-  real<lower=1> sigma;
+  real<lower=0> sigma;
   // Hyperparameters
   vector[2] mu_mat;
-  real<lower=100> A[(N-1)*5+K];
-  real<lower=1> B[(N-1)*5+K];
-  real<lower=1> delta_H[(N-1)*5+K];
+  real<lower=100> A;
+  real<lower=0> B;
+  real<lower=0> delta_H;
   corr_matrix[2] sigma_mat;
   corr_matrix[2] sigma_for_prior;
 }
@@ -71,8 +71,8 @@ transformed parameters{
   // Population slope
   for(k in 1:K){
     for(n in 1:N){
-       beta1[(n-1)*5+k] = exp(log(A[(N-1)*5+K]) + B[(N-1)*5+K]*x1[(n-1)*5+k] + delta_H[(N-1)*5+K]*x2[(n-1)*5+k]); 
-       mu[(n-1)*5+k] = beta0[n] + beta1[(n-1)*5+k] * pow(t_ijk[(n-1)*5+k],gamma[n]);
+      beta1[(n-1)*5+k] = exp(log(A) + B*x1[(n-1)*5+k] + delta_H*x2[(n-1)*5+k]); 
+      mu[(n-1)*5+k] = beta0[n] + beta1[(n-1)*5+k] * pow(t_ijk[(n-1)*5+k],gamma[n]);
     }
   }
 }
@@ -94,12 +94,8 @@ model {
       y_ijk[(n-1)*5+k] ~ lognormal(mu[(n-1)*5+k], sigma);
     }
   }
- 
- 
+  
 }
-
-
-
 
 
 
