@@ -70,12 +70,13 @@ stan_code <- "New_Stan.stan"
 
 # Run Stan
 runStan <- stan("New_Stan.stan",data=stan_data, 
-                chains = 3, iter = 8500, warmup = 1000, thin = 10, init_r = .1)
+                chains = 3, iter = 8500, warmup = 1000, thin = 100, init_r = .1)
 print(runStan, pars=c("mat"))
 
 
 list_of_draws <- extract(runStan)
 print(names(list_of_draws))
+head(list_of_draws$sigma_mat)
 dim(list_of_draws$mat)
 
 
@@ -89,9 +90,10 @@ print(runStan, pars=c("mat","A","B","delta_H","sigma_mat","sigma"))
 
 
 resStanExt <- rstan::extract(runStan, permuted = TRUE)
-rstan::traceplot(runStan, pars = c("mat","A","B","delta_H","sigma_mat","sigma"), inc_warmup = FALSE)
-pdf(paste(outdir,"stan trace plot.pdf",sep=""))
-rstan::traceplot(runStan, pars = c("sigma"), inc_warmup = FALSE)
+# rstan::traceplot(runStan, pars = c("mat","A","B","delta_H","sigma_mat","sigma"), inc_warmup = FALSE)
+# rstan::traceplot(runStan, pars = c("A"), inc_warmup = FALSE)
+pdf(paste(outdir,"stan trace plot_A.pdf",sep=""))
+rstan::traceplot(runStan, pars = c("A"), inc_warmup = FALSE)
 dev.off()
 
 
