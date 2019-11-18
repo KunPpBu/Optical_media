@@ -49,7 +49,7 @@ parameters {
   // Random effect
   // matrix[N,2] mat;
   // Level-1
-  real<lower=1> sigma;
+  real<lower=0> sigma;
   // Hyperparameters
   vector[2] mu_mat;
   real A;
@@ -62,35 +62,40 @@ parameters {
 //Parameters processing before the postier is computed
 transformed parameters{
   // Random effect
-  real beta0;
-  real gamma;
+  row_vector[N] beta0;
+  row_vector[N] gamma;
   row_vector[(N-1)*5+K] beta1;
   row_vector[(N-1)*5+K] mu;
-  beta0 = mu_mat[1];
-  gamma = mu_mat[2];
   // Population slope
-  for(k in 1:K){
-    for(n in 1:N){
+  for(n in 1:N){
+      beta0[n] = mu_mat[1];
+      gamma[n] = mu_mat[2];
+      // print("beta0:", beta0);
+  }
+  for(n in 1:N){
+    for(k in 1:K){
       beta1[(n-1)*5+k] = exp(log(A) + B*x1[(n-1)*5+k] + delta_H*x2[(n-1)*5+k]); 
-      mu[(n-1)*5+k] = beta0 + beta1[(n-1)*5+k] * pow(t_ijk[(n-1)*5+k],gamma);
+      mu[(n-1)*5+k] = beta0[n] + beta1[(n-1)*5+k] * pow(t_ijk[(n-1)*5+k],gamma[n]);
+      // print("mu:", mu);
     }
   }
 }
 
 
 model {
-  // mu ~ cauchy(0,1e-3);
+  mu[(N-1)*5+K] ~ normal(0, sqrt(1000));
   sigma ~ gamma(1e-3,1e-3);
-  mu_mat[1] ~ normal(0,1e-3);
-  mu_mat[2] ~ normal(0,1e-3);
-  A ~ normal(0,1e-3);
-  B ~ normal(0, 1e-3);
-  delta_H ~ normal(0,1e-3);
+  mu_mat[1] ~ normal(0, sqrt(1000));
+  mu_mat[2] ~ normal(0, sqrt(1000));
+  A ~ normal(0, sqrt(1000));
+  B ~ normal(0, sqrt(1000));
+  delta_H ~ normal(0, sqrt(1000));
   mu_mat ~ multi_normal(mean_mat,sigma_mat);
-  sigma_mat ~ wishart(3,sigma_for_prior);
+  sigma_mat ~ wishart(2,sigma_for_prior);
   sigma_for_prior ~ lkj_corr(1);
-  for (k in 1:K){
-    for (n in 1:N){
+  for (n in 1:N){
+    for (k in 1:K){
+      // target += lognormal_lpdf(y_ijk[(n-1)*5+k] | mu[(n-1)*5+k],sigma);
       y_ijk[(n-1)*5+k] ~ lognormal(mu[(n-1)*5+k], sigma);
     }
   }
