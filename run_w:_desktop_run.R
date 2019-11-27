@@ -10,16 +10,16 @@ sigma <- list()
 bvn <- list()
 
 for(n in 1:N){
-  sigma[[n]] <- matrix(c(sampler_draws[n,7],sampler_draws[n,8],sampler_draws[n,8],sampler_draws[n,9]),nrow=2,ncol=2) 
+  sigma[[n]] <- matrix(c(ss_desktop_run[n,7],ss_desktop_run[n,8],ss_desktop_run[n,8],ss_desktop_run[n,9]),nrow=2,ncol=2) 
   bvn[[n]] <- mvrnorm(1, mu = mu, Sigma = sigma[[n]] )
 }
 bvn<-matrix(unlist(bvn),ncol=2,byrow=T)
 #set a time 
-t <- seq(0,1099999,by=100)
+t <- seq(0,109999,by=1000)
 #input the normal use condition x1 is RH, x2 is Temp
-x1 <- rep((log(50)-log(40))/(log(85)-log(40)),9000)
+x1 <- rep((log(50)-log(40))/(log(85)-log(40)),110)
 head(x1)
-x2 <- rep((11605/(25+273.15)-11605/(15+273.15))/(11605/(85+273.15)-11605/(15+273.15)),9000)
+x2 <- rep((11605/(25+273.15)-11605/(15+273.15))/(11605/(85+273.15)-11605/(15+273.15)),110)
 head(x2)
 
 #function for degrad
@@ -27,9 +27,9 @@ re_func <- function(t, par, bvn,x1,x2){
   beta0 <- NULL
   beta1 <- NULL
   gamma <- NULL
-  deg <- matrix(rep(0,N*9000),N,9000)
+  deg <- matrix(rep(0,N*110),N,110)
   for(i in 1:N){
-    for(j in 1:9000)
+    for(j in 1:110)
     {
       beta0[i] <- par[i,4]+bvn[i,1]
       beta1[i] <- exp(log(par[i,3])+par[i,1]*x1[j]+par[i,2]*x2[j])

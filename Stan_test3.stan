@@ -52,10 +52,10 @@ parameters {
   real<lower=0> sigma;
   // Hyperparameters
   vector[2] mu_mat;
-  real A;
+  real logA;
   real B;
   real delta_H;
-  corr_matrix[2] sigma_mat;
+  cov_matrix[2] sigma_mat;
   corr_matrix[2] sigma_for_prior;
 }
 
@@ -74,7 +74,7 @@ transformed parameters{
   }
   for(n in 1:N){
     for(k in 1:K){
-      beta1[(n-1)*5+k] = exp(log(A) + B*x1[(n-1)*5+k] + delta_H*x2[(n-1)*5+k]); 
+      beta1[(n-1)*5+k] = exp(logA + B*x1[(n-1)*5+k] + delta_H*x2[(n-1)*5+k]); 
       mu[(n-1)*5+k] = beta0[n] + beta1[(n-1)*5+k] * pow(t_ijk[(n-1)*5+k],gamma[n]);
       // print("mu:", mu);
     }
@@ -83,16 +83,16 @@ transformed parameters{
 
 
 model {
-  mu[(N-1)*5+K] ~ normal(0, sqrt(1000));
+  // mu[(N-1)*5+K] ~ normal(0, sqrt(1000));
   sigma ~ gamma(1e-3,1e-3);
   mu_mat[1] ~ normal(0, sqrt(1000));
   mu_mat[2] ~ normal(0, sqrt(1000));
-  A ~ normal(0, sqrt(1000));
+  logA ~ normal(0, sqrt(1000));
   B ~ normal(0, sqrt(1000));
   delta_H ~ normal(0, sqrt(1000));
   mu_mat ~ multi_normal(mean_mat,sigma_mat);
   sigma_mat ~ wishart(2,sigma_for_prior);
-  sigma_for_prior ~ lkj_corr(1);
+  // sigma_for_prior ~ lkj_corr(1);
   for (n in 1:N){
     for (k in 1:K){
       // target += lognormal_lpdf(y_ijk[(n-1)*5+k] | mu[(n-1)*5+k],sigma);

@@ -36,11 +36,11 @@ stan_data <- list(N=N,
 
 #initial values
 mu_mat <- matrix(runif(450,1,2),nrow=N,ncol=2)
-sigma_for_prior <- matrix(c(1,1,1,1),2,2)
+sigma_for_prior <- matrix(c(1,0,0,1),2,2)
 sigma <- rnorm(450,0,1)
-sigma_mat <- matrix(c(1,0.5,0.5,1),nrow=2, ncol=2)
-A <- rnorm(N,0,2)
-B <- rnorm(N,0,2)
+sigma_mat <- matrix(c(1,0,0,1),nrow=2, ncol=2)
+logA <- rnorm(N,0,1e-3)
+B <- rnorm(N,0,1e-3)
 delta_H <- rnorm(450,10,1.5)
 # epsilon <- matrix(runif(450,1,2),nrow=N,ncol=2)
 
@@ -50,17 +50,17 @@ stan_code <- "Stan_test3.stan"
 
 # Run Stan
 fitStan <- stan("Stan_test3.stan",data=stan_data, 
-                chains = 3, iter = 5500, warmup = 1000, thin = 100, init_r = .1)
-print(fitStan, pars=c("A"))
-plot(fitStan,pars=c("A","B","delta_H","sigma","sigma_mat","mu_mat"))
+                chains = 3, iter = 8500, warmup = 3000, thin = 100, init_r = .1)
+print(fitStan, pars=c("logA"))
+plot(fitStan,pars=c("logA","B","delta_H","sigma","sigma_mat","mu_mat"))
 
 # Retrieve the posterior draws 
 matrix_of_draws <- as.matrix(fitStan)
 print(colnames(matrix_of_draws))
-sampler_draws <- as.matrix(fitStan, pars = c("B", "delta_H","A","mu_mat[1]","mu_mat[2]","sigma","sigma_mat[1,1]","sigma_mat[1,2]","sigma_mat[2,2]"))
+sampler_draws <- as.matrix(fitStan, pars = c("B", "delta_H","logA","mu_mat[1]","mu_mat[2]","sigma","sigma_mat[1,1]","sigma_mat[1,2]","sigma_mat[2,2]"))
 head(sampler_draws)
 dim(sampler_draws)
-mean(sampler_draws[,8])
+mean(sampler_draws[,9])
 # Save Stan Output
 save(sampler_draws, file = "stan_sampler.RData")
 
@@ -86,7 +86,7 @@ rstan::traceplot(fitStan, pars = c("A","B","delta_H"), inc_warmup = FALSE)
 dev.off()
 # Plot all parameters trace in one pdf file
 pdf(paste(outdir,"trace plot_newstan_test4.pdf",sep=""))
-rstan::traceplot(fitStan, pars = c("mu_mat[1]","mu_mat[2]","delta_H","A","B","sigma","sigma_mat[1,1]","sigma_mat[1,2]", "sigma_mat[2,2]"), inc_warmup = FALSE)
+rstan::traceplot(fitStan, pars = c("mu_mat[1]","mu_mat[2]","delta_H","logA","B","sigma","sigma_mat[1,1]","sigma_mat[1,2]", "sigma_mat[2,2]"), inc_warmup = FALSE)
 dev.off()
 
 # ACF plots
@@ -94,6 +94,6 @@ install.packages("bayesplot")
 library("bayesplot")
 pdf(paste(outdir,"ACF_test4.pdf",sep=""))
 posterior_cp <- as.array(fitStan)
-mcmc_acf(posterior_cp, pars = c("A","B","delta_H","sigma","mu_mat[1]","mu_mat[2]","sigma_mat[1,1]","sigma_mat[1,2]", "sigma_mat[2,2]"), lags = 20)
+mcmc_acf(posterior_cp, pars = c("logA","B","delta_H","sigma","mu_mat[1]","mu_mat[2]","sigma_mat[1,1]","sigma_mat[1,2]", "sigma_mat[2,2]"), lags = 20)
 dev.off()
 
